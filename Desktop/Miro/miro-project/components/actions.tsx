@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { Link2, Pencil, Trash2 } from "lucide-react";
 import { DropdownMenuContentProps } from "@radix-ui/react-dropdown-menu";
-
+import { useRouter } from 'next/navigation';
 import { ConfirmModal } from "@/components/confirm-modal";
 import {
   DropdownMenu,
@@ -34,6 +34,7 @@ export const Actions = ({
 }: ActionsProps) => {
   const { onOpen } = useRenameModal();
   const { mutate, pending } = useApiMutation(api.board.remove);
+  const router =useRouter();
 
   const onCopyLink = () => {
     navigator.clipboard.writeText(
@@ -45,7 +46,10 @@ export const Actions = ({
 
   const onDelete = () => {
     mutate({ id })
-      .then(() => toast.success("Board deleted"))
+      .then(() =>{
+         toast.success("Board deleted");
+         router.push("/");
+  })
       .catch(() => toast.error("Failed to delete board"));
   };
 

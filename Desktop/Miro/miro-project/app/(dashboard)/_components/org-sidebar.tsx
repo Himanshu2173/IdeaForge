@@ -3,12 +3,16 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Poppins } from "next/font/google";
-import { LayoutDashboard, Star } from "lucide-react";
-import { OrganizationSwitcher } from "@clerk/nextjs";
+import { Banknote, LayoutDashboard, Star } from "lucide-react";
+import { OrganizationSwitcher, useOrganization } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
-
+import { useAction, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
+import {Badge} from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const font = Poppins({
   subsets: ["latin"],
@@ -19,6 +23,31 @@ export const OrgSidebar = () => {
   const searchParams = useSearchParams();
   const favorites = searchParams.get("favorites");
 
+  const {organization} = useOrganization();
+  const isSubscribed = useQuery(api.subscriptions.getIsSubscribed, {
+    orgId: organization?.id,
+  });
+
+  const pay= useAction(api.stripe.pay);
+  const portal= useAction(api.stripe.portal);
+  const [pending, setPending] =useState(false);
+  const onClick = async () => {
+    if(!organization?.id) return;
+    setPending(true);
+
+    try{
+      const action = isSubscribed ? portal : pay;
+      const redirectUrl = await action({
+        orgId: organization.id,
+      });
+
+      window.location.href = redirectUrl;
+    } catch {
+      toast.error("Some error occured");
+    } finally {
+      setPending(false);
+    }
+  };
   return (
     <div className="hidden lg:flex flex-col space-y-6 w-[206px] pl-5 pt-5">
       
@@ -36,6 +65,11 @@ export const OrgSidebar = () => {
           )}>
               Board
           </span>
+        {isSubscribed &&(
+          <Badge variant="secondary">
+            PRO
+          </Badge>
+        ) }
         </div>
       </Link>
       <OrganizationSwitcher
@@ -85,6 +119,16 @@ export const OrgSidebar = () => {
             Favorite boards
           </Link>
         </Button> 
+        <Button
+          onClick={onClick}
+          disabled={pending}
+          variant="ghost"
+          size="lg"
+          className="font-normal justify-start px-2 w-full"
+        >
+          <Banknote className="h-4 w-4 mr-2" />
+          {isSubscribed ? "Payment Settings" :"Upgrade"}
+        </Button>
       </div> 
     </div>
   );

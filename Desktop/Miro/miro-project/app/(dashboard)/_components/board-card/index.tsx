@@ -25,7 +25,6 @@ interface BoardCardProps {
   orgId: string;
   isFavorite: boolean;
 };
-
 export const BoardCard = ({
   id,
   title,
