@@ -1,6 +1,6 @@
 ******IdeaForge:******
 
-• Designed a collaborative online whiteboard platform inspired by **Miro** using **Next.js** and **React.js**.
+• Designed a collaborative online whiteboard platform using **Next.js** and **React.js**.
 
 • Integrated **Clerk** for user authentication and authorization functionalities.
 
